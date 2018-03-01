@@ -44,7 +44,7 @@ void MainWindow::save()
 
 void MainWindow::startWebcam()
 {
-    p_stream1 = new cv::VideoCapture (1);
+    p_stream1 = new cv::VideoCapture (0); //0 - pierwsza kamera, gdy jest wiecej kamer mozna uzywac kolejnych numerow
 
     timer_ = startTimer(100);
 }
