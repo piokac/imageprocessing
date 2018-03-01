@@ -44,11 +44,18 @@
       <item>
        <widget class="QLabel" name="image_area">
         <property name="text">
-         <string>TextLabel</string>
+         <string/>
         </property>
        </widget>
       </item>
      </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QCheckBox" name="checkBox_showOriginal">
+      <property name="text">
+       <string>pokaż orginalny obraz</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -66,6 +73,7 @@
      <string>Plik</string>
     </property>
     <addaction name="actionOtworz"/>
+    <addaction name="actionZapisz_obraz"/>
    </widget>
    <widget class="QMenu" name="menuWebcam">
     <property name="title">
@@ -116,6 +124,14 @@
   <action name="actionOdswiez">
    <property name="text">
     <string>Odswiez</string>
+   </property>
+  </action>
+  <action name="actionZapisz_obraz">
+   <property name="text">
+    <string>Zapisz obraz</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

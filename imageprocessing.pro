@@ -19,23 +19,19 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 win32{
-        LIBS += -L"C:/opencv/build/x64/vc14/bin"
+        LIBS += -L"C:/opencv/build/x64/vc15/bin" -L"C:/opencv/build/x64/vc15/lib"
         DEPENDPATH += C:/opencv/build/include
         INCLUDEPATH += C:/opencv/build/include
         CONFIG(debug){
-            LIBS += -lopencv_world330d
+            LIBS += -lopencv_world341d
         }
 
         CONFIG(release){
-            LIBS += -lopencv_world330
+            LIBS += -lopencv_world341
         }
 }
 unix {
-                #LIBS += -lGLU -lGL
 
-                #INCLUDEPATH +=/home/piotr/OpenCV/opencv-2.4.10include/opencv2
-                #INCLUDEPATH +=/home/piotr/OpenCV/opencv-2.4.10/include/opencv2
-                #DEPENDPATH +=/home/piotr/OpenCV/opencv-2.4.10/build/include/opencv2
                 INCLUDEPATH +=/usr/local/include/opencv2
                 LIBS +=  -lopencv_highgui -lopencv_core -lopencv_imgproc -lopencv_videoio -lopencv_imgcodecs
 }

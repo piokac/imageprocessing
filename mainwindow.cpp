@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QDir>
 #include <QFileDialog>
+#include <QDateTime>
 //using namespace cv;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionStart,SIGNAL(triggered(bool)),this,SLOT(startWebcam()));
     connect(ui->actionStop,SIGNAL(triggered(bool)),this,SLOT(stopWebcam()));
     connect(ui->actionOdswiez,SIGNAL(triggered(bool)),this,SLOT(refresh()));
+    connect(ui->actionZapisz_obraz,SIGNAL(triggered(bool)),this,SLOT(save()));
 
 }
 
@@ -33,9 +35,16 @@ void MainWindow::open()
 
 }
 
+void MainWindow::save()
+{
+    if(img.empty()) return;
+    QString filename = "screenshot"+QDateTime::currentDateTime().toString("dd-MM-yyyThh-mm-ss")+".jpg";
+    imwrite( filename.toLatin1().data(), img );
+}
+
 void MainWindow::startWebcam()
 {
-    p_stream1 = new cv::VideoCapture (0);
+    p_stream1 = new cv::VideoCapture (1);
 
     timer_ = startTimer(100);
 }
@@ -51,10 +60,10 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
     cv::Mat cameraFrame;
     if(!p_stream1->isOpened()) return;
-    (*p_stream1)>>cameraFrame;
+    (*p_stream1)>>img;
 
-    processFrame(cameraFrame);
-    displayMat(cameraFrame);
+    processFrame(img);
+    displayMat(img);
 
 }
 
@@ -62,36 +71,18 @@ void MainWindow::processFrame(cv::Mat &processFrame)
 {
     if(processFrame.empty())
         return;
+    if(ui->checkBox_showOriginal->isChecked()) return;
     int L1 = ui->horizontalSlider_L1->value();
-    cv::Mat in = processFrame, out;
-#if 0
+    cv::Mat in = processFrame, out=processFrame;
+
     // thresholding on grey
-    cv::Mat greyMat;
-    cv::cvtColor(in, greyMat, CV_BGR2GRAY);
-    cv::Mat res;
-    cv::threshold( greyMat, res, L1, 255,cv::THRESH_BINARY );
-    cv::cvtColor(res, out, CV_GRAY2BGR);
-#endif
-#if 0
-    //thresholding on RGB
-    int low_b=0,low_g=0, low_r = L1, high_b = 255, high_g = 255, high_r = 255;
-    cv::Mat greyMat;
-    cv::inRange(in,cv::Scalar(low_b,low_g,low_r), cv::Scalar(high_b,high_g,high_r),greyMat);
+    //    cv::Mat greyMat;
+    //    cv::cvtColor(in, greyMat, CV_BGR2GRAY);
+    //    cv::Mat res;
+    //    cv::threshold( greyMat, res, L1, 255,cv::THRESH_BINARY );
 
-    cv::cvtColor(greyMat, out, CV_GRAY2BGR);
-#endif
+    //    cv::cvtColor(res, out, CV_GRAY2BGR);
 
-#if 1
-    //thresholding on HSV
-    cv::Mat hsvMat;
-    cv::cvtColor(in, hsvMat, CV_BGR2HSV);
-    int low_h=L1,low_s=50, low_v = 50, high_h = 180, high_s = 255, high_v= 255;
-    cv::Mat greyMat;
-    cv::inRange(hsvMat,cv::Scalar(low_h,low_s,low_v), cv::Scalar(high_h,high_s,high_v),greyMat);
-
-    cv::cvtColor(greyMat, out, CV_GRAY2BGR);
-#endif
-    //imshow("Video Capture",out);
     processFrame = out; // musi być BGR
 
 }

@@ -20,6 +20,7 @@ public:
     ~MainWindow();
 public slots:
     void open();
+    void save();
     void startWebcam();
     void stopWebcam();
     void timerEvent(QTimerEvent *event);
