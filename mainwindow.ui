@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>554</width>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
+      <item row="4" column="1">
        <widget class="QSlider" name="horizontalSlider_L1">
         <property name="maximum">
          <number>255</number>
@@ -27,15 +27,42 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="4" column="4">
+       <widget class="QLCDNumber" name="lcdNumber_L1max"/>
+      </item>
+      <item row="4" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>L1</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="4" column="3">
+       <widget class="QSlider" name="horizontalSlider_L1max">
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
        <widget class="QLCDNumber" name="lcdNumber"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>min</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>max</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -50,10 +77,58 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QCheckBox" name="checkBox_showOriginal">
       <property name="text">
        <string>pokaż orginalny obraz</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>kernel size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="spinBox_kernelSize">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="value">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QSpinBox" name="spinBox_blur">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Rozmycie</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <widget class="QCheckBox" name="checkBox_segmentationOn">
+      <property name="text">
+       <string>wlacz segmentacje</string>
       </property>
      </widget>
     </item>
@@ -64,7 +139,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>554</width>
      <height>19</height>
     </rect>
    </property>
@@ -145,12 +220,12 @@
    <slot>display(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>302</x>
-     <y>214</y>
+     <x>321</x>
+     <y>169</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>220</y>
+     <x>391</x>
+     <y>173</y>
     </hint>
    </hints>
   </connection>
@@ -161,8 +236,104 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
-     <y>214</y>
+     <x>206</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider_L1max</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_L1max</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>237</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>237</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider_L1max</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>actionOdswiez</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>176</x>
+     <y>236</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_blur</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>actionOdswiez</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>479</x>
+     <y>222</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_kernelSize</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>actionOdswiez</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>209</x>
+     <y>222</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_segmentationOn</sender>
+   <signal>clicked()</signal>
+   <receiver>actionOdswiez</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_showOriginal</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>actionOdswiez</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>245</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>

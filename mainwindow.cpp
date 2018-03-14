@@ -5,7 +5,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QDateTime>
-//using namespace cv;
+#include <vector>
+using namespace std;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -27,8 +28,11 @@ MainWindow::~MainWindow()
 void MainWindow::open()
 {
 
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open Image"),QDir::currentPath(),tr("Image Files [ *.jpg , *.jpeg , *.bmp , *.png , *.gif]"));
-
+    if(path.isEmpty())
+        path = QDir::currentPath();
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open Image"),path,tr("Image Files [ *.jpg , *.jpeg , *.bmp , *.png , *.gif]"));
+    QDir dir;
+    path = dir.absoluteFilePath(fileName);
     filename = fileName.toLocal8Bit().data();
 
     refresh();
@@ -66,6 +70,42 @@ void MainWindow::timerEvent(QTimerEvent *event)
     displayMat(img);
 
 }
+using namespace cv;
+cv::Mat MainWindow::segmentation(cv::Mat src, cv::Mat color)
+{
+
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+
+    findContours( src, contours, hierarchy,
+                  CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+    if(contours.size()==0) return color;
+
+
+    int idx = 0;
+    cv::Mat res;
+
+    cv::cvtColor(src,res, CV_GRAY2BGR);
+
+    for( ; idx >= 0; idx = hierarchy[idx][0] )
+    {
+
+        Scalar color( 127+rand()%127, 127+rand()%127, 127+rand()%127 );
+
+        drawContours( res, contours, idx, color, CV_FILLED, 8, hierarchy );
+    }
+
+
+    cv::Mat mask;
+    cv::cvtColor(res,mask,CV_BGR2GRAY);
+    cv::threshold(mask,mask,1,255,CV_THRESH_BINARY_INV);
+    cv::cvtColor(mask,mask,CV_GRAY2BGR);
+    cv::bitwise_and(mask,color,color);
+    cv::bitwise_or(res,color,res);
+
+    return res;
+
+}
 
 void MainWindow::processFrame(cv::Mat &processFrame)
 {
@@ -73,15 +113,33 @@ void MainWindow::processFrame(cv::Mat &processFrame)
         return;
     if(ui->checkBox_showOriginal->isChecked()) return;
     int L1 = ui->horizontalSlider_L1->value();
+    int L1max = ui->horizontalSlider_L1max->value();
+    int kernelSize = ui->spinBox_kernelSize->value();
+    int blur_size = ui->spinBox_blur->value();
+
     cv::Mat in = processFrame, out=processFrame;
 
     // thresholding on grey
-    //    cv::Mat greyMat;
-    //    cv::cvtColor(in, greyMat, CV_BGR2GRAY);
-    //    cv::Mat res;
-    //    cv::threshold( greyMat, res, L1, 255,cv::THRESH_BINARY );
+    cv::Mat greyMat;
+    cv::cvtColor(in, greyMat, CV_BGR2GRAY);
+    cv::Mat res;
+    //cv::threshold( greyMat, res, L1, 255,cv::THRESH_TOZERO_INV );
+    if(blur_size>0)
+        cv::blur(greyMat, greyMat,cv::Size( blur_size , blur_size ));
 
-    //    cv::cvtColor(res, out, CV_GRAY2BGR);
+    cv::inRange(greyMat,L1, L1max,res);
+
+    //tworzenie kernela
+    cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 2*kernelSize + 1, 2*kernelSize+1 ), cv::Point( kernelSize, kernelSize ) );
+
+    //erozja
+    cv::morphologyEx(res, res,cv::MORPH_ERODE,element);
+
+
+    if(ui->checkBox_segmentationOn->isChecked())
+        out = segmentation(res,in);
+    else
+        cv::cvtColor(res, out, CV_GRAY2BGR);
 
     processFrame = out; // musi być BGR
 

@@ -18,6 +18,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    cv::Mat segmentation(cv::Mat res, cv::Mat color);
+    
 public slots:
     void open();
     void save();
@@ -34,6 +36,7 @@ private:
     cv::VideoCapture* p_stream1;
     int timer_;
     cv::String filename;
+    QString path;
 };
 
 #endif // MAINWINDOW_H
