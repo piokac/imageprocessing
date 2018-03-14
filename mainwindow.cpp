@@ -48,7 +48,7 @@ void MainWindow::save()
 
 void MainWindow::startWebcam()
 {
-    p_stream1 = new cv::VideoCapture (1);
+    p_stream1 = new cv::VideoCapture (0);
 
     timer_ = startTimer(100);
 }
