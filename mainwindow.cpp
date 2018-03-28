@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <vector>
+#include <opencv2/features2d.hpp>
 using namespace std;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -48,7 +49,7 @@ void MainWindow::save()
 
 void MainWindow::startWebcam()
 {
-    p_stream1 = new cv::VideoCapture (0);
+    p_stream1 = new cv::VideoCapture (1);
 
     timer_ = startTimer(100);
 }
@@ -114,33 +115,41 @@ void MainWindow::processFrame(cv::Mat &processFrame)
     if(ui->checkBox_showOriginal->isChecked()) return;
     int L1 = ui->horizontalSlider_L1->value();
     int L1max = ui->horizontalSlider_L1max->value();
+    int L2 = ui->horizontalSlider_L2->value();
+    int L2max = ui->horizontalSlider_L2max->value();
+    int L3 = ui->horizontalSlider_L3->value();
+    int L3max = ui->horizontalSlider_L3_max->value();
     int kernelSize = ui->spinBox_kernelSize->value();
     int blur_size = ui->spinBox_blur->value();
 
     cv::Mat in = processFrame, out=processFrame;
 
-    // thresholding on grey
-    cv::Mat greyMat;
-    cv::cvtColor(in, greyMat, CV_BGR2GRAY);
-    cv::Mat res;
-    //cv::threshold( greyMat, res, L1, 255,cv::THRESH_TOZERO_INV );
-    if(blur_size>0)
-        cv::blur(greyMat, greyMat,cv::Size( blur_size , blur_size ));
 
-    cv::inRange(greyMat,L1, L1max,res);
+
+    cv::Mat res;
+    cv::inRange(in,cv::Scalar(L1,L2,L3), cv::Scalar(L1max,L2max,L3max),res);
 
     //tworzenie kernela
     cv::Mat element = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 2*kernelSize + 1, 2*kernelSize+1 ), cv::Point( kernelSize, kernelSize ) );
 
     //erozja
-    cv::morphologyEx(res, res,cv::MORPH_ERODE,element);
+    cv::morphologyEx(res, res,cv::MORPH_OPEN,element);
+    cv::morphologyEx(res, res,cv::MORPH_CLOSE,element);
 
+    if(ui->checkBox_detector->isChecked())
+    {
+        detect(res);
+    }
 
     if(ui->checkBox_segmentationOn->isChecked())
         out = segmentation(res,in);
     else
         cv::cvtColor(res, out, CV_GRAY2BGR);
 
+    if(ui->checkBox_detector->isChecked())
+    {
+        drawKeypoints( out, keypoints, out, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+    }
     processFrame = out; // musi być BGR
 
 }
@@ -154,6 +163,44 @@ void MainWindow::refresh()
         processFrame(img);
         displayMat(img);
     }
+}
+
+void MainWindow::detect(Mat image)
+{
+    // Setup SimpleBlobDetector parameters.
+    cv::SimpleBlobDetector::Params params;
+    bitwise_not ( image, image );
+    // Change thresholds
+    params.minThreshold = 50;
+    params.maxThreshold = 255;
+
+    // Filter by Area.
+    params.filterByArea = ui->checkBox_Area->isChecked();
+    params.minArea = ui->horizontalSlider_area->value()*100;
+
+    // Filter by Circularity
+    params.filterByCircularity = false;
+    params.minCircularity = 0.1;
+
+    // Filter by Convexity
+    params.filterByConvexity = false;
+    params.minConvexity = 0.0;
+
+    // Filter by Inertia
+    params.filterByInertia = ui->checkBox_inertia->isChecked();
+    params.minInertiaRatio = ui->horizontalSlider_inertia->value()/10.0;
+
+
+
+    // Set up detector with params
+    Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+
+    // SimpleBlobDetector::create creates a smart pointer.
+    // So you need to use arrow ( ->) instead of dot ( . )
+    //std::vector<KeyPoint> keypoints;
+    detector->detect( image, keypoints);
+    bitwise_not ( image, image );
+
 }
 
 void MainWindow::displayMat(cv::Mat& image)

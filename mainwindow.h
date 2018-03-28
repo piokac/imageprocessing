@@ -28,6 +28,7 @@ public slots:
     void timerEvent(QTimerEvent *event);
     void processFrame(cv::Mat& processFrame);
     void refresh();
+    void detect(cv::Mat image);
 private:
     void displayMat(cv::Mat &image);
     Ui::MainWindow *ui;
@@ -36,6 +37,7 @@ private:
     cv::VideoCapture* p_stream1;
     int timer_;
     cv::String filename;
+    std::vector<cv::KeyPoint> keypoints;
     QString path;
 };
 
