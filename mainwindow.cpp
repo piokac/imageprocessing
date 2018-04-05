@@ -203,14 +203,71 @@ void MainWindow::detect(Mat image)
 
 }
 
-void MainWindow::displayMat(cv::Mat& image)
+void MainWindow::displayMat(cv::Mat& input)
 {
-    if(image.empty())
+    if(input.empty())
         return;
-    QImage qimg(image.cols, image.rows, QImage::Format_RGB888);
-    memcpy(qimg.bits(),image.data,image.cols*image.rows*3);
-    qimg = qimg.rgbSwapped();
+    //    cv::imshow("obraz",image);
 
-    QPixmap item = QPixmap::fromImage(qimg);
-    ui->image_area->setPixmap(item);
+    //    QImage qimg(image.cols, image.rows, QImage::Format_RGB888);
+    //    memcpy(qimg.bits(),image.data,image.cols*image.rows*3);
+    //    qimg = qimg.rgbSwapped();
+    QImage img;
+
+    switch (input.type()) {
+
+    case CV_8UC3:
+
+    case CV_8SC3:
+
+        img = QImage(input.cols, input.rows, QImage::Format_RGB888);
+
+        if (input.cols % 4 ==0) {
+
+            memcpy(img.bits(),input.data,input.cols*input.rows*3);
+
+        } else {
+
+            for (int r = 0; r < input.rows; r++) {
+
+
+                memcpy(img.scanLine(r),input.data+(input.step[0]*r),input.cols*3);
+
+            }
+
+        }
+
+        img = img.rgbSwapped();
+
+        break;
+
+    case CV_8UC1:
+
+    case CV_8SC1:
+
+        img = QImage(input.cols, input.rows, QImage::Format_Grayscale8);
+
+        memcpy(img.bits(),input.data,input.cols*input.rows);
+
+        break;
+
+    default:
+
+        //qDebug() << "Mat_to_QImage(): unsupported input format";
+
+        break;
+
+    }
+    if(img.height()>800)
+    {
+        QPixmap item = QPixmap::fromImage(img.scaled(QSize(800,800),Qt::KeepAspectRatio));
+        ui->image_area->setPixmap(item);
+    }
+    else
+    {
+        QPixmap item = QPixmap::fromImage(img);
+        ui->image_area->setPixmap(item);
+    }
+
 }
+
